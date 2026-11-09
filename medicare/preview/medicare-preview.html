@@ -1,0 +1,1098 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>MediCare — Clinic Management System</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --blue:#16A34A; --blue-dark:#0E7C39; --blue-light:#EAF7EF;
+    --navy:#0F172A; --teal:#0B4F3F; --teal-light:#E3F3EC;
+    --text:#0F172A; --muted:#6B7280;
+    --bg:#F1F3F5; --card:#FFFFFF; --border:#EAECEF;
+    --success:#16A34A; --warning:#F59E0B; --error:#DC2626;
+    --r-lg:20px; --r-md:16px; --r-sm:10px;
+    --shadow:0 1px 2px rgba(15,23,42,.03), 0 8px 22px rgba(15,23,42,.05);
+    --shadow-hover:0 14px 34px rgba(15,23,42,.10);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --text:#EAF0F7; --muted:#94A3B8; --blue-light:#0F2A1B; --teal-light:#0E241D;
+      --bg:#070B14; --card:#0E1626; --border:#1D2A3D;
+    }
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:14px;-webkit-font-smoothing:antialiased;}
+  h1,h2,h3,h4{font-family:'Plus Jakarta Sans','Inter',sans-serif;}
+  ::selection{background:var(--blue-light);}
+  a{color:inherit;}
+
+  /* ============ LOGIN ============ */
+  #loginScreen{position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;
+    background:radial-gradient(1200px 600px at 15% -10%, var(--blue-light), transparent),
+               radial-gradient(1000px 500px at 110% 110%, var(--teal-light), transparent), var(--bg);}
+  .login-card{background:var(--card);border:1px solid var(--border);border-radius:20px;box-shadow:var(--shadow-hover);padding:38px 36px;width:400px;max-width:90vw;}
+  .login-logo{width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,var(--blue),var(--teal));color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:21px;margin:0 auto 14px;}
+  .login-card h1{font-size:20px;text-align:center;margin:0 0 4px;font-weight:800;}
+  .login-card p.sub{text-align:center;color:var(--muted);margin:0 0 22px;font-size:13px;}
+  .role-tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:20px;background:var(--bg);padding:4px;border-radius:10px;border:1px solid var(--border);}
+  .role-tabs button{border:none;background:transparent;padding:8px 4px;border-radius:8px;font-size:11.5px;font-weight:700;color:var(--muted);cursor:pointer;transition:.15s;}
+  .role-tabs button.active{background:var(--card);color:var(--blue);box-shadow:0 1px 3px rgba(0,0,0,.08);}
+  .field{margin-bottom:15px;}
+  .field label{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px;}
+  .field input{width:100%;border:1.5px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;background:var(--bg);color:var(--text);font-family:inherit;font-size:14px;transition:.15s;}
+  .field input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-light);}
+  .login-btn{width:100%;background:var(--blue);color:#fff;border:none;border-radius:var(--r-sm);padding:11px;font-weight:700;font-size:14px;cursor:pointer;transition:.15s;}
+  .login-btn:hover{background:var(--blue-dark);}
+  .login-btn:active{transform:scale(.98);}
+  .demo-box{margin-top:16px;background:var(--blue-light);border:1px solid rgba(37,99,235,.2);border-radius:var(--r-sm);padding:10px 12px;font-size:12px;line-height:1.6;}
+  .demo-box b{color:var(--blue);}
+  .login-error{background:rgba(220,38,38,.1);border:1px solid rgba(220,38,38,.25);color:var(--error);border-radius:var(--r-sm);padding:8px 12px;font-size:12.5px;margin-bottom:14px;display:none;}
+
+  /* ============ APP SHELL ============ */
+  #app{display:none;}
+  .layout{display:flex;min-height:100vh;gap:16px;padding:16px;background:var(--bg);}
+  .sidebar{width:236px;background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:20px 0;flex-shrink:0;box-shadow:var(--shadow);height:calc(100vh - 32px);position:sticky;top:16px;overflow:auto;}
+  .brand{display:flex;align-items:center;gap:10px;padding:0 20px 20px;}
+  .brand .logo{width:36px;height:36px;border-radius:11px;background:linear-gradient(135deg,var(--blue),var(--teal));color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:16px;}
+  .brand span{font-weight:800;font-size:15.5px;letter-spacing:-.01em;}
+  .role-pill{margin:0 16px 16px;background:var(--teal-light);color:var(--teal);font-weight:700;font-size:11px;padding:5px 10px;border-radius:999px;display:inline-block;text-transform:uppercase;letter-spacing:.03em;}
+  .nav{padding:0 10px;}
+  .nav a{display:flex;align-items:center;gap:11px;padding:9px 12px;margin:2px 0;border-radius:9px;color:var(--muted);text-decoration:none;font-weight:500;cursor:pointer;font-size:13.5px;transition:.12s;}
+  .nav a .ic{width:18px;text-align:center;font-size:15px;opacity:.85;}
+  .nav a:hover{background:var(--bg);color:var(--text);}
+  .nav a.active{background:var(--blue-light);color:var(--blue);font-weight:700;}
+
+  .main{flex:1;display:flex;flex-direction:column;min-width:0;gap:16px;}
+  .topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 22px;background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);box-shadow:var(--shadow);}
+  .search-wrap{position:relative;width:300px;}
+  .search-wrap input{width:100%;border:1.5px solid var(--border);border-radius:9px;padding:8px 12px 8px 32px;background:var(--bg);color:var(--text);font-family:inherit;font-size:13.5px;}
+  .search-wrap input:focus{outline:none;border-color:var(--blue);}
+  .search-wrap .ic{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:13px;}
+  .topbar-right{display:flex;align-items:center;gap:16px;}
+  .bell{font-size:16px;color:var(--muted);cursor:pointer;position:relative;}
+  .bell .dotnotif{position:absolute;top:-3px;right:-3px;width:7px;height:7px;background:var(--error);border-radius:50%;border:2px solid var(--card);}
+  .user-chip{display:flex;align-items:center;gap:9px;}
+  .avatar{width:32px;height:32px;border-radius:50%;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12.5px;}
+  .user-name{font-weight:700;font-size:13.5px;}
+  .user-role{font-size:11px;color:var(--muted);}
+  .btn-logout{background:transparent;border:1.5px solid var(--border);color:var(--text);border-radius:8px;padding:7px 14px;font-weight:700;font-size:12.5px;cursor:pointer;}
+  .btn-logout:hover{border-color:var(--error);color:var(--error);background:rgba(220,38,38,.06);}
+
+  .content{flex:1;overflow:auto;}
+  .page{display:none;}
+  .page.active{display:block;animation:fadeIn .2s ease;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:none;}}
+  .greeting{font-size:21px;font-weight:800;letter-spacing:-.01em;margin:0 0 2px;}
+  .greeting-sub{color:var(--muted);font-size:13.5px;margin:0 0 22px;}
+
+  .cards{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px;}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:var(--r-md);box-shadow:var(--shadow);padding:20px 22px;transition:.18s;}
+  .card:hover{box-shadow:var(--shadow-hover);transform:translateY(-1px);}
+  .stat-icon{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:17px;margin-bottom:10px;}
+  .stat-icon.blue{background:var(--blue-light);color:var(--blue);}
+  .stat-icon.teal{background:var(--teal-light);color:var(--teal);}
+  .stat-icon.amber{background:rgba(245,158,11,.14);color:var(--warning);}
+  .stat-icon.green{background:rgba(22,163,74,.12);color:var(--success);}
+  .stat-label{font-size:12.5px;color:var(--muted);margin-bottom:4px;font-weight:600;}
+  .stat-value{font-size:26px;font-weight:800;letter-spacing:-.02em;}
+
+  .row2{display:grid;grid-template-columns:1.6fr 1fr;gap:16px;margin-bottom:16px;}
+  .row2b{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+  h3{font-size:14.5px;margin:0 0 16px;font-weight:700;}
+  table{width:100%;border-collapse:collapse;}
+  thead th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);border-bottom:1.5px solid var(--border);padding:9px 8px;font-weight:700;}
+  tbody td{padding:11px 8px;border-bottom:1px solid var(--border);font-size:13.5px;}
+  tbody tr:hover{background:var(--bg);}
+  tbody tr:last-child td{border-bottom:none;}
+
+  .badge{display:inline-flex;align-items:center;gap:5px;padding:3.5px 11px;border-radius:999px;font-size:11px;font-weight:700;}
+  .badge.green,.badge.completed,.badge.paid,.badge.confirmed,.badge.available{color:var(--success);background:rgba(22,163,74,.12);}
+  .badge.amber,.badge.scheduled,.badge.pending{color:var(--warning);background:rgba(245,158,11,.14);}
+  .badge.red,.badge.cancelled,.badge.noshow,.badge.overdue{color:var(--error);background:rgba(220,38,38,.12);}
+  .badge.blue,.badge.booked{color:var(--blue);background:rgba(37,99,235,.12);}
+  .badge.teal{color:var(--teal);background:var(--teal-light);}
+
+  .toolbar{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
+  .toolbar input, .toolbar select{border:1.5px solid var(--border);border-radius:9px;padding:9px 12px;background:var(--card);color:var(--text);font-family:inherit;font-size:13.5px;}
+  .toolbar input:focus, .toolbar select:focus{outline:none;border-color:var(--blue);}
+  .toolbar input{flex:1;min-width:200px;}
+  .btn{background:var(--blue);color:#fff;border:none;border-radius:9px;padding:9px 16px;font-weight:700;cursor:pointer;font-size:13px;transition:.15s;}
+  .btn:hover{background:var(--blue-dark);}
+  .btn:active{transform:scale(.98);}
+  .btn-teal{background:var(--teal);}
+  .btn-teal:hover{background:#0b5c56;}
+  .btn-outline{background:transparent;border:1.5px solid var(--border);color:var(--text);}
+  .btn-outline:hover{background:var(--bg);}
+  .btn-sm{padding:6px 12px;font-size:12px;}
+
+  .bars{display:flex;align-items:end;gap:20px;height:150px;padding-top:10px;}
+  .bar-group{display:flex;flex-direction:column;align-items:center;gap:9px;flex:1;}
+  .bar-pair{display:flex;align-items:end;gap:3px;height:120px;}
+  .bar{width:13px;border-radius:4px 4px 0 0;}
+  .legend{display:flex;gap:18px;margin-top:12px;font-size:12px;color:var(--muted);}
+  .legend span{display:flex;align-items:center;gap:6px;}
+  .dot{width:7px;height:7px;border-radius:50%;display:inline-block;}
+  .dot.green{background:var(--success);} .dot.red{background:var(--error);} .dot.blue{background:var(--blue);} .dot.amber{background:var(--warning);}
+
+  .top-flex{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:10px;}
+  .top-flex h2{margin:0;font-size:19px;font-weight:800;letter-spacing:-.01em;}
+  .pagehead{font-size:19px;font-weight:800;margin:0 0 18px;}
+
+  .modal-bg{position:fixed;inset:0;background:rgba(15,23,42,.5);backdrop-filter:blur(2px);display:none;align-items:center;justify-content:center;z-index:60;padding:20px;}
+  .modal-bg.show{display:flex;}
+  .modal{background:var(--card);border-radius:18px;padding:24px;width:460px;max-width:100%;box-shadow:0 20px 50px rgba(0,0,0,.25);max-height:88vh;overflow:auto;}
+  .modal.wide{width:600px;}
+  .modal h3{font-size:16.5px;margin-bottom:4px;}
+  .modal label{display:block;font-size:12px;margin:12px 0 5px;color:var(--muted);font-weight:600;}
+  .modal input, .modal select, .modal textarea{width:100%;border:1.5px solid var(--border);border-radius:9px;padding:9px 11px;background:var(--bg);color:var(--text);font-family:inherit;font-size:13.5px;}
+  .modal input:focus, .modal select:focus, .modal textarea:focus{outline:none;border-color:var(--blue);}
+  .modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:20px;}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .muted{color:var(--muted);}
+  .banner{background:var(--blue-light);border:1px solid rgba(37,99,235,.2);color:var(--blue);padding:11px 15px;border-radius:10px;font-size:13px;margin-bottom:20px;font-weight:500;}
+
+  .slot-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:6px;}
+  .slot{border:1.5px solid var(--border);border-radius:9px;padding:9px 6px;text-align:center;font-size:12.5px;font-weight:600;cursor:pointer;background:var(--bg);transition:.12s;}
+  .slot:hover{border-color:var(--blue);}
+  .slot.selected{background:var(--blue);color:#fff;border-color:var(--blue);}
+  .slot.booked{background:rgba(220,38,38,.08);color:var(--error);border-color:rgba(220,38,38,.2);cursor:not-allowed;text-decoration:line-through;opacity:.7;}
+
+  .doc-card{display:flex;gap:14px;padding:16px;border:1px solid var(--border);border-radius:var(--r-md);cursor:pointer;transition:.15s;background:var(--card);}
+  .doc-card:hover{box-shadow:var(--shadow-hover);border-color:var(--blue);}
+  .doc-card.selected{border-color:var(--blue);background:var(--blue-light);}
+  .doc-avatar{width:46px;height:46px;border-radius:12px;background:var(--teal-light);color:var(--teal);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;flex-shrink:0;}
+  .rx-row{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr auto;gap:8px;margin-bottom:8px;align-items:center;}
+  .rx-row input{border:1.5px solid var(--border);border-radius:8px;padding:7px 9px;background:var(--bg);color:var(--text);font-size:13px;}
+  .icon-btn{background:transparent;border:none;color:var(--error);cursor:pointer;font-size:16px;}
+  .filter-pills{display:flex;gap:8px;margin-bottom:18px;}
+  .filter-pills button{border:1.5px solid var(--border);background:var(--card);border-radius:999px;padding:7px 16px;font-size:12.5px;font-weight:700;cursor:pointer;color:var(--muted);}
+  .filter-pills button.active{background:var(--blue);color:#fff;border-color:var(--blue);}
+
+  /* ============ NEW DASHBOARD (fintech-style) ============ */
+  @keyframes floatIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
+  @keyframes growBar{from{transform:scaleY(0);}to{transform:scaleY(1);}}
+  @keyframes drawLine{from{stroke-dashoffset:600;}to{stroke-dashoffset:0;}}
+  @keyframes popIn{from{opacity:0;transform:translate(-50%,4px) scale(.9);}to{opacity:1;transform:translate(-50%,0) scale(1);}}
+  @keyframes countPulse{0%{opacity:.4;}100%{opacity:1;}}
+
+  .dash-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px;flex-wrap:wrap;gap:12px;}
+  .dash-title{font-size:26px;font-weight:800;letter-spacing:-.02em;margin:0;}
+  .dash-title b{color:var(--muted);font-weight:800;}
+  .date-pill{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--border);border-radius:999px;padding:8px 16px;font-size:12.5px;font-weight:600;box-shadow:var(--shadow);}
+  .cta-pill{background:var(--blue);color:#fff;border:none;border-radius:999px;padding:10px 18px;font-weight:700;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;box-shadow:0 8px 18px rgba(22,163,74,.25);}
+  .cta-pill:hover{background:var(--blue-dark);}
+
+  .dash-grid{display:grid;grid-template-columns:1fr 1.5fr 1fr;gap:16px;margin-bottom:16px;align-items:start;}
+  .fcard{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);box-shadow:var(--shadow);padding:20px;animation:floatIn .4s ease both;}
+  .fcard-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;}
+  .fcard-head h4{margin:0;font-size:13.5px;font-weight:700;}
+  .fcard-head small{color:var(--muted);font-size:11.5px;}
+  .fcard-arrow{width:28px;height:28px;border-radius:50%;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--text);}
+
+  .hero-card{background:linear-gradient(150deg,var(--teal) 0%,#0f6e56 60%,var(--blue) 130%);color:#fff;border-radius:18px;padding:20px;position:relative;overflow:hidden;box-shadow:0 16px 30px rgba(11,79,63,.28);}
+  .hero-card::after{content:'';position:absolute;right:-40px;top:-40px;width:140px;height:140px;border-radius:50%;background:rgba(255,255,255,.08);}
+  .hero-top{display:flex;justify-content:space-between;align-items:flex-start;font-size:12px;opacity:.9;margin-bottom:26px;}
+  .hero-chip{background:rgba(255,255,255,.18);padding:4px 10px;border-radius:999px;font-weight:700;font-size:10.5px;letter-spacing:.04em;}
+  .hero-big{font-size:22px;font-weight:800;letter-spacing:.02em;margin-bottom:4px;}
+  .hero-sub{font-size:11.5px;opacity:.85;}
+  .hero-foot{display:flex;justify-content:space-between;align-items:flex-end;margin-top:22px;font-size:11px;opacity:.9;}
+
+  .growth-card{margin-top:16px;}
+  .growth-row{display:flex;align-items:center;justify-content:space-between;}
+  .growth-badge{background:rgba(22,163,74,.14);color:var(--blue);font-weight:800;font-size:11.5px;padding:3px 9px;border-radius:999px;}
+
+  .toggle-pill{display:flex;background:var(--bg);border-radius:999px;padding:3px;gap:2px;}
+  .toggle-pill button{border:none;background:transparent;padding:6px 14px;border-radius:999px;font-size:11.5px;font-weight:700;color:var(--muted);cursor:pointer;}
+  .toggle-pill button.active{background:var(--blue);color:#fff;}
+
+  .chart-wrap{position:relative;height:190px;display:flex;align-items:end;gap:14px;padding:20px 6px 0;}
+  .chart-bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;height:100%;justify-content:flex-end;position:relative;}
+  .chart-bar{width:26px;border-radius:8px 8px 4px 4px;transform-origin:bottom;animation:growBar .7s cubic-bezier(.2,.8,.3,1) both;position:relative;}
+  .chart-bar.peak{background:var(--blue) !important;}
+  .peak-tip{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;font-size:10.5px;font-weight:800;padding:4px 9px;border-radius:8px;white-space:nowrap;animation:popIn .5s ease .6s both;}
+  .peak-tip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:4px solid transparent;border-top-color:var(--navy);}
+  .chart-xaxis{display:flex;justify-content:space-around;margin-top:8px;font-size:11px;color:var(--muted);}
+
+  .line-chart-wrap{position:relative;height:130px;margin-top:6px;}
+  .line-chart-wrap svg{width:100%;height:100%;overflow:visible;}
+  .line-path{fill:none;stroke:#fff;stroke-width:2.5;stroke-linecap:round;stroke-dasharray:600;animation:drawLine 1.4s ease both;}
+  .line-fill{opacity:0;animation:floatIn .6s ease .5s both;}
+
+  .avatar-stack{display:flex;align-items:center;}
+  .avatar-stack .av{width:30px;height:30px;border-radius:50%;border:2px solid var(--card);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;margin-left:-8px;}
+  .avatar-stack .av:first-child{margin-left:0;}
+
+  .ph-table{width:100%;border-collapse:collapse;}
+  .ph-table thead th{text-align:left;font-size:11px;color:var(--muted);font-weight:700;padding:8px 6px;border-bottom:1px solid var(--border);}
+  .ph-table tbody td{padding:12px 6px;border-bottom:1px solid var(--border);font-size:13px;}
+  .ph-table tbody tr:last-child td{border-bottom:none;}
+  .ph-name{display:flex;align-items:center;gap:10px;}
+  .ph-icon{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12.5px;color:#fff;flex-shrink:0;}
+  .ph-status{display:inline-flex;align-items:center;gap:6px;font-weight:600;font-size:12.5px;}
+  .ph-status .sdot{width:6px;height:6px;border-radius:50%;background:var(--success);}
+</style>
+</head>
+<body>
+
+<!-- ===================== LOGIN ===================== -->
+<div id="loginScreen">
+  <div class="login-card">
+    <div class="login-logo">M</div>
+    <h1>MediCare</h1>
+    <p class="sub">Clinic Management System</p>
+
+    <div class="role-tabs" id="roleTabs">
+      <button class="active" data-role="Admin">Admin</button>
+      <button data-role="Doctor">Doctor</button>
+      <button data-role="Receptionist">Receptionist</button>
+      <button data-role="Patient">Patient</button>
+    </div>
+
+    <div class="login-error" id="loginError">Invalid username or password.</div>
+
+    <div class="field"><label>Username</label><input id="loginUser" placeholder="admin" /></div>
+    <div class="field"><label>Password</label><input id="loginPass" type="password" placeholder="••••••••" /></div>
+    <button class="login-btn" onclick="doLogin()">Sign in</button>
+
+    <div class="demo-box">
+      🔑 <b>Demo login (any role):</b> Username <b>admin</b> · Password <b>admin123</b><br/>
+      <span class="muted">Static preview only — no real database is connected.</span>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== APP ===================== -->
+<div id="app">
+<div class="layout">
+  <aside class="sidebar">
+    <div class="brand"><div class="logo">M</div><span>MediCare</span></div>
+    <div class="role-pill" id="rolePill">Admin</div>
+    <nav class="nav" id="navList"></nav>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="search-wrap"><span class="ic">🔍</span><input placeholder="Search patients, doctors, appointments..." /></div>
+      <div class="topbar-right">
+        <span class="bell">🔔<span class="dotnotif"></span></span>
+        <div class="user-chip">
+          <div class="avatar" id="userAvatar">A</div>
+          <div><div class="user-name" id="userName">admin</div><div class="user-role" id="userRoleLabel">Administrator</div></div>
+        </div>
+        <button class="btn-logout" onclick="doLogout()">Logout</button>
+      </div>
+    </header>
+
+    <div class="content">
+      <div class="banner">Static interactive preview — actions update data in this browser tab only. The real app persists everything to PostgreSQL via Django REST APIs (see the project zip + README).</div>
+
+      <!-- DASHBOARD -->
+      <div class="page active" id="page-dashboard">
+        <div class="dash-top">
+          <div>
+            <h2 class="dash-title">Welcome back, <b id="dashUserName">Admin</b></h2>
+            <p class="greeting-sub" style="margin-top:4px;">Here's what's happening at the clinic today.</p>
+          </div>
+          <div style="display:flex;gap:10px;align-items:center;">
+            <div class="date-pill">📅 19 Sep — 26 Sep 2026</div>
+            <button class="cta-pill" onclick="openBooking()">+ New Appointment</button>
+          </div>
+        </div>
+
+        <div class="dash-grid">
+          <!-- LEFT: hero + growth -->
+          <div>
+            <div class="hero-card">
+              <div class="hero-top"><span>Today's Duty</span><span class="hero-chip">LIVE</span></div>
+              <div class="hero-big" id="heroDoctorCount">0 Doctors</div>
+              <div class="hero-sub">On duty across all departments</div>
+              <div class="hero-foot">
+                <div><div style="font-size:16px;font-weight:800;" id="heroApptCount">0</div><div>Appointments</div></div>
+                <div style="text-align:right;"><div style="font-size:16px;font-weight:800;" id="heroLeaveCount">0</div><div>On Leave</div></div>
+              </div>
+            </div>
+            <div class="fcard growth-card" style="animation-delay:.1s;">
+              <div class="stat-label">Total Patients</div>
+              <div class="growth-row">
+                <div class="stat-value" style="font-size:22px;" id="growthPatientCount">0</div>
+                <span class="growth-badge" id="growthBadge">New</span>
+              </div>
+              <div class="muted" style="font-size:11.5px;margin-top:4px;">Registered so far</div>
+            </div>
+          </div>
+
+          <!-- MIDDLE: bar chart -->
+          <div class="fcard" style="animation-delay:.15s;">
+            <div class="fcard-head">
+              <div><h4>Appointment Overview</h4><small>This week</small></div>
+              <div class="toggle-pill">
+                <button class="active" onclick="setChartRange('week',this)">Week</button>
+                <button onclick="setChartRange('month',this)">Month</button>
+              </div>
+            </div>
+            <div class="chart-wrap" id="barChart"></div>
+            <div class="chart-xaxis" id="barChartLabels"></div>
+          </div>
+
+          <!-- RIGHT: patients trend -->
+          <div class="fcard" style="background:linear-gradient(180deg,var(--teal),#0c5b48);color:#fff;animation-delay:.2s;">
+            <div class="fcard-head">
+              <div><h4 style="color:#fff;">Total Patients</h4><small style="color:rgba(255,255,255,.7);">All-time</small></div>
+              <div class="fcard-arrow" style="background:rgba(255,255,255,.15);color:#fff;">↗</div>
+            </div>
+            <div style="font-size:26px;font-weight:800;margin-bottom:6px;" id="totalPatientsBig">0</div>
+            <div class="line-chart-wrap">
+              <svg viewBox="0 0 260 110" preserveAspectRatio="none">
+                <defs>
+                  <linearGradient id="lineGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#ffffff" stop-opacity="0.35"/>
+                    <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+                  </linearGradient>
+                </defs>
+                <path class="line-fill" d="M0,80 L20,60 L50,70 L80,40 L110,55 L140,25 L170,45 L200,20 L230,35 L260,15 L260,110 L0,110 Z" fill="url(#lineGrad)"/>
+                <path class="line-path" d="M0,80 L20,60 L50,70 L80,40 L110,55 L140,25 L170,45 L200,20 L230,35 L260,15" />
+              </svg>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:14px;">
+              <button class="btn" style="background:#fff;color:var(--teal);flex:1;" onclick="goToPage('patients')">View Patients</button>
+              <button class="btn btn-outline" style="border-color:rgba(255,255,255,.4);color:#fff;flex:1;" onclick="goToPage('appointments')">Appointments</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="row2b">
+          <div class="fcard" style="animation-delay:.25s;">
+            <div class="fcard-head"><div><h4>Doctors On Duty</h4><small>Available right now</small></div></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+              <div class="avatar-stack" id="dutyAvatars"></div>
+              <span class="muted" style="font-size:12px;" id="dutyMoreLabel"></span>
+            </div>
+          </div>
+          <div class="fcard" style="animation-delay:.3s;">
+            <div class="fcard-head"><div><h4>Pending Payments</h4><small>To be collected</small></div></div>
+            <div class="stat-value" style="font-size:24px;color:var(--warning);" id="pendingPaymentsBig">₹0</div>
+            <div class="muted" style="font-size:11.5px;margin-top:4px;" id="pendingInvoiceCount">No open invoices</div>
+          </div>
+        </div>
+
+        <div class="fcard" style="animation-delay:.35s;">
+          <div class="fcard-head"><div><h4>Recent Appointments</h4><small>Latest activity</small></div><span class="btn-outline btn btn-sm" onclick="goToPage('appointments')">View all</span></div>
+          <table class="ph-table">
+            <thead><tr><th>Patient</th><th>Doctor</th><th>Date</th><th>Time</th><th>Status</th></tr></thead>
+            <tbody id="recentApptsBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- PATIENTS -->
+      <div class="page" id="page-patients">
+        <div class="top-flex"><h2>Patients <span class="muted" id="patientCount" style="font-weight:400;font-size:15px;"></span></h2><button class="btn" onclick="openModal('patientModal')">+ Add Patient</button></div>
+        <div class="toolbar"><input placeholder="Search by name, phone, email..." oninput="filterPatients(this.value)" /></div>
+        <div class="card">
+          <table><thead><tr><th>Name</th><th>Age/Gender</th><th>Phone</th><th>Blood Group</th><th>Appointments</th><th>Outstanding</th><th></th></tr></thead>
+          <tbody id="patientsBody"></tbody></table>
+        </div>
+      </div>
+
+      <!-- DOCTORS -->
+      <div class="page" id="page-doctors">
+        <div class="top-flex"><h2>Doctors <span class="muted" style="font-weight:400;font-size:15px;">(6)</span></h2><button class="btn" onclick="openModal('doctorModal')">+ Add Doctor</button></div>
+        <div class="cards" id="doctorsGrid" style="grid-template-columns:repeat(3,1fr);"></div>
+      </div>
+
+      <!-- APPOINTMENTS -->
+      <div class="page" id="page-appointments">
+        <div class="top-flex"><h2>Appointments <span class="muted" id="apptCount" style="font-weight:400;font-size:15px;"></span></h2><button class="btn btn-teal" onclick="openBooking()">+ Book Appointment</button></div>
+        <div class="toolbar">
+          <select id="apptStatusFilter" onchange="renderAppointments()"><option value="">All statuses</option><option>Scheduled</option><option>Completed</option><option>Cancelled</option><option>No Show</option></select>
+        </div>
+        <div class="card">
+          <table><thead><tr><th>Patient</th><th>Doctor</th><th>Date</th><th>Time</th><th>Status</th><th></th></tr></thead>
+          <tbody id="apptsBody"></tbody></table>
+        </div>
+      </div>
+
+      <!-- PRESCRIPTIONS -->
+      <div class="page" id="page-prescriptions">
+        <div class="top-flex"><h2>Prescriptions</h2><button class="btn" onclick="openModal('rxModal')">+ New Prescription</button></div>
+        <div class="card">
+          <table><thead><tr><th>Patient</th><th>Doctor</th><th>Date</th><th>Medicines</th><th></th></tr></thead>
+          <tbody id="rxBody"></tbody></table>
+        </div>
+      </div>
+
+      <!-- MEDICAL HISTORY (patient/doctor view) -->
+      <div class="page" id="page-history">
+        <h2 class="pagehead">Medical History</h2>
+        <div class="card" id="historyList"></div>
+      </div>
+
+      <!-- BILLING -->
+      <div class="page" id="page-billing">
+        <div class="top-flex"><h2>Billing</h2><button class="btn btn-teal" onclick="openModal('billModal')">+ Generate Invoice</button></div>
+        <div class="card">
+          <table><thead><tr><th>Invoice</th><th>Patient</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead>
+          <tbody id="billsBody"></tbody></table>
+        </div>
+      </div>
+
+      <!-- REPORTS -->
+      <div class="page" id="page-reports">
+        <h2 class="pagehead">Reports</h2>
+        <div class="filter-pills" id="reportFilters">
+          <button class="active" data-range="today">Today</button>
+          <button data-range="7d">7 Days</button>
+          <button data-range="30d">30 Days</button>
+        </div>
+        <div class="cards" id="reportCards"></div>
+        <div class="card">
+          <h3>Doctor Performance</h3>
+          <table><thead><tr><th>Doctor</th><th>Appointments</th><th>Completed</th><th>Revenue</th></tr></thead>
+          <tbody id="doctorPerfBody"></tbody></table>
+        </div>
+      </div>
+
+      <!-- DEPARTMENTS / USERS / SETTINGS / PROFILE / CALLS (simple placeholders) -->
+      <div class="page" id="page-departments"><h2 class="pagehead">Departments</h2>
+        <div class="row2b" id="departmentsGrid"></div>
+      </div>
+      <div class="page" id="page-users"><h2 class="pagehead">Users</h2><div class="card muted">Manage Admin, Doctor and Receptionist accounts here.</div></div>
+      <div class="page" id="page-settings"><h2 class="pagehead">Settings</h2>
+        <div class="fcard muted" style="margin-bottom:14px;">Clinic profile, working hours, and notification preferences.</div>
+        <div class="fcard">
+          <h4 style="margin-bottom:8px;">Data</h4>
+          <p class="muted" style="font-size:12.5px;">Everything you add (patients, doctors, appointments, prescriptions, bills) is saved in this browser only, so it survives refresh. Use this to clear it and start over.</p>
+          <button class="btn btn-outline" style="border-color:var(--error);color:var(--error);" onclick="resetAllData()">Reset all data</button>
+        </div>
+      </div>
+      <div class="page" id="page-profile"><h2 class="pagehead">Profile</h2><div class="card muted">Your personal details and password change would live here.</div></div>
+      <div class="page" id="page-calls"><h2 class="pagehead">Calls / Requests</h2><div class="card muted">Incoming appointment requests from the public website (WordPress) land here for confirmation.</div></div>
+      <div class="page" id="page-bills"><h2 class="pagehead">My Bills</h2><div class="card" id="myBillsList"></div></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ===== Patient Modal ===== -->
+<div class="modal-bg" id="patientModal"><div class="modal">
+  <h3>Add Patient</h3>
+  <div class="grid2">
+    <div><label>Full Name</label><input id="p-name" /></div>
+    <div><label>Phone</label><input id="p-phone" /></div>
+    <div><label>Email</label><input id="p-email" /></div>
+    <div><label>Date of Birth</label><input id="p-dob" type="date" /></div>
+    <div><label>Gender</label><select id="p-gender"><option>Male</option><option>Female</option><option>Other</option></select></div>
+    <div><label>Blood Group</label><select id="p-blood"><option>O+</option><option>A+</option><option>B+</option><option>AB+</option><option>O-</option></select></div>
+  </div>
+  <label>Address</label><input id="p-address" />
+  <label>Emergency Contact</label><input id="p-emergency" />
+  <div class="modal-actions"><button class="btn btn-outline" onclick="closeModal('patientModal')">Cancel</button><button class="btn" onclick="savePatient()">Save Patient</button></div>
+</div></div>
+
+<!-- ===== Doctor Modal ===== -->
+<div class="modal-bg" id="doctorModal"><div class="modal">
+  <h3>Add Doctor</h3>
+  <div class="grid2">
+    <div><label>Doctor Name</label><input id="d-name" placeholder="Dr. ..." /></div>
+    <div><label>Specialization</label><input id="d-spec" /></div>
+    <div><label>Experience (yrs)</label><input id="d-exp" type="number" /></div>
+    <div><label>Consultation Fee (₹)</label><input id="d-fee" type="number" /></div>
+    <div><label>Available Days</label><input id="d-days" placeholder="Mon–Sat" /></div>
+    <div><label>Available Time</label><input id="d-time" placeholder="10:00 AM – 5:00 PM" /></div>
+  </div>
+  <div class="modal-actions"><button class="btn btn-outline" onclick="closeModal('doctorModal')">Cancel</button><button class="btn" onclick="saveDoctor()">Save Doctor</button></div>
+</div></div>
+
+<!-- ===== Booking Modal ===== -->
+<div class="modal-bg" id="bookingModal"><div class="modal wide">
+  <h3>Book Appointment</h3>
+  <label>Patient</label>
+  <select id="bk-patient"></select>
+  <label>Select Doctor</label>
+  <div class="cards" id="bk-doctors" style="grid-template-columns:1fr 1fr;gap:10px;margin:8px 0 0;"></div>
+  <label>Select Date</label>
+  <input id="bk-date" type="date" onchange="renderSlots()" />
+  <label>Available Slots</label>
+  <div class="slot-grid" id="bk-slots"></div>
+  <div class="modal-actions"><button class="btn btn-outline" onclick="closeModal('bookingModal')">Cancel</button><button class="btn btn-teal" onclick="confirmBooking()">Confirm Booking</button></div>
+</div></div>
+
+<!-- ===== Prescription Modal ===== -->
+<div class="modal-bg" id="rxModal"><div class="modal wide">
+  <h3>New Prescription</h3>
+  <div class="grid2">
+    <div><label>Patient</label><select id="rx-patient"></select></div>
+    <div><label>Doctor</label><select id="rx-doctor"></select></div>
+  </div>
+  <div class="grid2">
+    <div><label>Diagnosis</label><input id="rx-diagnosis" /></div>
+    <div><label>Notes</label><input id="rx-notes" /></div>
+  </div>
+  <label style="margin-top:16px;">Medicines</label>
+  <div id="rxRows"></div>
+  <button class="btn btn-outline btn-sm" onclick="addRxRow()" style="margin-top:6px;">+ Add Medicine</button>
+  <div class="modal-actions"><button class="btn btn-outline" onclick="closeModal('rxModal')">Cancel</button><button class="btn" onclick="saveRx()">Save Prescription</button></div>
+</div></div>
+
+<!-- ===== Billing Modal ===== -->
+<div class="modal-bg" id="billModal"><div class="modal">
+  <h3>Generate Invoice</h3>
+  <label>Patient</label><select id="b-patient"></select>
+  <div class="grid2">
+    <div><label>Consultation (₹)</label><input id="b-consult" type="number" value="800" oninput="calcTotal()" /></div>
+    <div><label>Medicine (₹)</label><input id="b-med" type="number" value="0" oninput="calcTotal()" /></div>
+  </div>
+  <div class="grid2">
+    <div><label>Test (₹)</label><input id="b-test" type="number" value="0" oninput="calcTotal()" /></div>
+    <div><label>Discount (₹)</label><input id="b-discount" type="number" value="0" oninput="calcTotal()" /></div>
+  </div>
+  <div style="margin-top:14px;padding:12px;background:var(--bg);border-radius:9px;display:flex;justify-content:space-between;font-weight:800;">
+    <span>Total</span><span id="b-total">₹800</span>
+  </div>
+  <label>Payment Status</label><select id="b-status"><option>Paid</option><option>Pending</option><option>Partial</option></select>
+  <div class="modal-actions"><button class="btn btn-outline" onclick="closeModal('billModal')">Cancel</button><button class="btn btn-teal" onclick="saveBill()">Generate</button></div>
+</div></div>
+
+<script>
+  // ================= AUTH =================
+  const roleNav = {
+    Admin: [['dashboard','📊','Dashboard'],['doctors','🩺','Doctors'],['patients','🧑‍🤝‍🧑','Patients'],['appointments','📅','Appointments'],['departments','🏬','Departments'],['prescriptions','💊','Prescriptions'],['billing','💳','Billing'],['reports','📈','Reports'],['users','👤','Users'],['settings','⚙️','Settings']],
+    Doctor: [['dashboard','📊','Dashboard'],['appointments','📅','My Appointments'],['patients','🧑‍🤝‍🧑','Patients'],['history','📋','Medical History'],['prescriptions','💊','Prescriptions'],['reports','📈','Reports'],['profile','👤','Profile']],
+    Receptionist: [['dashboard','📊','Dashboard'],['appointments','📅','Appointments'],['patients','🧑‍🤝‍🧑','Patients'],['doctors','🩺','Doctors'],['billing','💳','Billing'],['calls','☎️','Calls/Requests']],
+    Patient: [['dashboard','📊','Dashboard'],['appointments','📅','My Appointments'],['history','📋','Medical Records'],['prescriptions','💊','Prescriptions'],['bills','🧾','Bills'],['profile','👤','Profile']],
+  };
+  let currentRole = 'Admin';
+
+  document.querySelectorAll('#roleTabs button').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      document.querySelectorAll('#roleTabs button').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active');
+      currentRole = b.dataset.role;
+    });
+  });
+
+  function doLogin(){
+    const u = document.getElementById('loginUser').value.trim();
+    const p = document.getElementById('loginPass').value.trim();
+    const err = document.getElementById('loginError');
+    if(u === 'admin' && p === 'admin123'){
+      err.style.display = 'none';
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('app').style.display = 'block';
+      document.getElementById('userName').textContent = u;
+      document.getElementById('userAvatar').textContent = u[0].toUpperCase();
+      document.getElementById('userRoleLabel').textContent = currentRole;
+      document.getElementById('rolePill').textContent = currentRole;
+      document.getElementById('dashUserName').textContent = u.charAt(0).toUpperCase()+u.slice(1);
+      buildNav();
+      goToPage('dashboard');
+    } else { err.style.display = 'block'; }
+  }
+  document.getElementById('loginPass').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
+
+  function doLogout(){
+    document.getElementById('app').style.display = 'none';
+    document.getElementById('loginScreen').style.display = 'flex';
+    document.getElementById('loginUser').value = '';
+    document.getElementById('loginPass').value = '';
+    document.getElementById('loginError').style.display = 'none';
+  }
+
+  function buildNav(){
+    const nav = document.getElementById('navList');
+    nav.innerHTML = roleNav[currentRole].map((item,i)=>
+      `<a data-page="${item[0]}" class="${i===0?'active':''}" onclick="goToPage('${item[0]}')"><span class="ic">${item[1]}</span>${item[2]}</a>`
+    ).join('');
+  }
+  function goToPage(page){
+    document.querySelectorAll('.nav a').forEach(a=>a.classList.toggle('active', a.dataset.page===page));
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    const el = document.getElementById('page-'+page);
+    if(el) el.classList.add('active');
+    if(page==='history') renderHistory();
+    if(page==='bills') renderMyBills();
+    if(page==='departments') renderDepartments();
+  }
+
+  function renderDepartments(){
+    const grid = document.getElementById('departmentsGrid');
+    if(!grid) return;
+    if(doctors.length===0){
+      grid.innerHTML = '<div class="card muted" style="grid-column:1/-1;text-align:center;padding:20px 0;">No doctors added yet, so no departments to show. Add a doctor with a specialization first.</div>';
+      return;
+    }
+    const groups = {};
+    doctors.forEach(d=>{
+      const key = d.spec || 'General';
+      groups[key] = (groups[key]||0) + 1;
+    });
+    grid.innerHTML = Object.entries(groups).map(([name,count])=>
+      `<div class="card"><h3>${name}</h3><div class="stat-value" style="font-size:22px;">${count} doctor${count===1?'':'s'}</div></div>`
+    ).join('');
+  }
+
+  // ================= DASHBOARD: ANIMATED BAR CHART =================
+  const barPalette = ['#BFE3CC','#BFE3CC','#BFE3CC','var(--blue)','#BFE3CC','#BFE3CC','#BFE3CC'];
+
+  function computeChartData(range){
+    if(range==='week'){
+      const labels = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+      const counts = [0,0,0,0,0,0,0];
+      appointments.forEach(a=>{
+        const d = new Date(a.date+'T00:00:00');
+        if(isNaN(d)) return;
+        const jsDay = d.getDay(); // 0=Sun..6=Sat
+        const idx = jsDay===0 ? 6 : jsDay-1; // convert to Mon-first index
+        counts[idx]++;
+      });
+      return labels.map((l,i)=>({l, v:counts[i]}));
+    }
+    // month: group by month abbreviation
+    const monthLabels = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const counts = new Array(12).fill(0);
+    appointments.forEach(a=>{
+      const d = new Date(a.date+'T00:00:00');
+      if(isNaN(d)) return;
+      counts[d.getMonth()]++;
+    });
+    return monthLabels.map((l,i)=>({l, v:counts[i]})).filter((_,i)=>counts[i]>0 || true).slice(0,12);
+  }
+
+  function renderBarChart(range){
+    const wrap = document.getElementById('barChart');
+    if(appointments.length===0){
+      wrap.innerHTML = '<div class="muted" style="width:100%;text-align:center;align-self:center;font-size:12.5px;">No appointment data yet — book one to see this chart fill in.</div>';
+      document.getElementById('barChartLabels').innerHTML = '';
+      return;
+    }
+    const data = computeChartData(range);
+    const max = Math.max(1, ...data.map(d=>d.v));
+    const peakIdx = data.findIndex(d=>d.v===max);
+    wrap.innerHTML = data.map((d,i)=>{
+      const h = Math.round((d.v/max)*100);
+      const isPeak = i===peakIdx && d.v>0;
+      return `<div class="chart-bar-col">
+        ${isPeak?`<div class="peak-tip">${d.v} booked</div>`:''}
+        <div class="chart-bar ${isPeak?'peak':''}" style="height:${Math.max(h,4)}%;background:${barPalette[i%barPalette.length]};animation-delay:${i*0.06}s;"></div>
+      </div>`;
+    }).join('');
+    document.getElementById('barChartLabels').innerHTML = data.map(d=>`<span>${d.l}</span>`).join('');
+  }
+  function setChartRange(range, btn){
+    document.querySelectorAll('.toggle-pill button').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    renderBarChart(range);
+  }
+
+  // ================= DASHBOARD: DOCTORS ON DUTY AVATAR STACK =================
+  function renderDutyAvatars(){
+    const onDuty = doctors.filter(d=>d.status==='Available');
+    const colors = ['#16A34A','#0B4F3F','#2563EB','#F59E0B'];
+    if(onDuty.length===0){
+      document.getElementById('dutyAvatars').innerHTML = '<span class="muted" style="font-size:12.5px;">No doctors added yet</span>';
+      document.getElementById('dutyMoreLabel').textContent = '';
+      return;
+    }
+    document.getElementById('dutyAvatars').innerHTML = onDuty.slice(0,4).map((d,i)=>
+      `<div class="av" style="background:${colors[i%colors.length]}" title="${d.name}">${d.name.split(' ').slice(-1)[0][0]}</div>`
+    ).join('');
+    document.getElementById('dutyMoreLabel').textContent = onDuty.length > 4 ? `+${onDuty.length-4} more` : '';
+  }
+
+  function updateDashboardStats(){
+    const availableDoctors = doctors.filter(d=>d.status==='Available').length;
+    const onLeave = doctors.filter(d=>d.status!=='Available').length;
+    document.getElementById('heroDoctorCount').textContent = availableDoctors + ' Doctor' + (availableDoctors===1?'':'s');
+    document.getElementById('heroApptCount').textContent = appointments.length;
+    document.getElementById('heroLeaveCount').textContent = onLeave;
+
+    document.getElementById('growthPatientCount').textContent = patients.length;
+    document.getElementById('growthBadge').textContent = patients.length>0 ? 'Active' : 'New';
+    document.getElementById('totalPatientsBig').textContent = patients.length.toLocaleString();
+
+    const pending = bills.filter(b=>b.status==='Pending'||b.status==='Partial');
+    const pendingTotal = pending.reduce((sum,b)=>sum+Number(b.amount||0),0);
+    document.getElementById('pendingPaymentsBig').textContent = '₹'+pendingTotal.toLocaleString();
+    document.getElementById('pendingInvoiceCount').textContent = pending.length>0 ? `Across ${pending.length} open invoice${pending.length===1?'':'s'}` : 'No open invoices';
+  }
+
+  // ================= DASHBOARD: DATA (starts empty, persists in YOUR browser via localStorage) =================
+  const STORAGE_KEY = 'medicare_demo_data_v1';
+
+  function loadData(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(raw) return JSON.parse(raw);
+    }catch(e){ /* ignore corrupt storage */ }
+    return {
+      seq: { patient:0, doctor:0, appt:0, rx:0, bill:0 },
+      doctors: [], patients: [], appointments: [], prescriptions: [], medicalHistory: [], bills: [],
+    };
+  }
+  function saveData(){
+    try{
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        seq: {patient:patientSeq, doctor:doctorSeq, appt:apptSeq, rx:rxSeq, bill:billSeq},
+        doctors, patients, appointments, prescriptions, medicalHistory, bills,
+      }));
+    }catch(e){ /* storage full or unavailable — data still works for this session */ }
+  }
+
+  const _stored = loadData();
+  let patientSeq = _stored.seq.patient, doctorSeq = _stored.seq.doctor,
+      apptSeq = _stored.seq.appt, rxSeq = _stored.seq.rx, billSeq = _stored.seq.bill;
+
+  const doctors = _stored.doctors;
+  const patients = _stored.patients;
+  const appointments = _stored.appointments;
+  const prescriptions = _stored.prescriptions;
+  const medicalHistory = _stored.medicalHistory;
+  const bills = _stored.bills;
+
+  function resetAllData(){
+    if(!confirm('This clears everything you have added in this browser. Continue?')) return;
+    localStorage.removeItem(STORAGE_KEY);
+    location.reload();
+  }
+
+  const SLOTS = ['10:00 AM','10:30 AM','11:00 AM','11:30 AM','12:00 PM','2:00 PM','2:30 PM','3:00 PM','3:30 PM'];
+
+  function fillSelect(id, list){
+    document.getElementById(id).innerHTML = list.map(v=>`<option>${v}</option>`).join('');
+  }
+
+  // ================= PATIENTS =================
+  function ageFromDob(dob){
+    if(!dob) return '—';
+    const d=new Date(dob), diff=Date.now()-d.getTime();
+    return Math.floor(diff/(365.25*24*3600*1000));
+  }
+  function renderPatients(list){
+    list = list || patients;
+    if(list.length===0){
+      document.getElementById('patientsBody').innerHTML = '<tr><td colspan="7" class="muted text-center" style="padding:20px 0;">No patients yet. Click "+ Add Patient" to add your first one.</td></tr>';
+      document.getElementById('patientCount').textContent = '(0)';
+      return;
+    }
+    document.getElementById('patientsBody').innerHTML = list.map(p=>`
+      <tr>
+        <td style="font-weight:600">${p.name}</td>
+        <td>${ageFromDob(p.dob)} / ${p.gender}</td>
+        <td>${p.phone}</td>
+        <td><span class="badge teal">${p.blood}</span></td>
+        <td>${p.appts}</td>
+        <td>${p.outstanding>0?'₹'+p.outstanding:'—'}</td>
+        <td><button class="btn btn-outline btn-sm" onclick="alert('Full profile view: appointments, prescriptions and medical history for '+'${p.name}'+' would open here.')">View</button></td>
+      </tr>`).join('');
+    document.getElementById('patientCount').textContent = '('+patients.length+')';
+  }
+  function filterPatients(q){
+    q=q.toLowerCase();
+    renderPatients(patients.filter(p=>[p.name,p.phone,p.email].some(v=>v.toLowerCase().includes(q))));
+  }
+  function savePatient(){
+    const name = document.getElementById('p-name').value.trim();
+    if(!name){ alert('Please enter the patient name.'); return; }
+    patientSeq++;
+    patients.unshift({
+      id: patientSeq, name,
+      phone: document.getElementById('p-phone').value.trim()||'—',
+      email: document.getElementById('p-email').value.trim()||'—',
+      dob: document.getElementById('p-dob').value,
+      gender: document.getElementById('p-gender').value,
+      blood: document.getElementById('p-blood').value,
+      address: document.getElementById('p-address').value.trim(),
+      emergency: document.getElementById('p-emergency').value.trim(),
+      appts:0, rx:0, outstanding:0,
+    });
+    renderPatients();
+    saveData(); updateDashboardStats();
+    ['p-name','p-phone','p-email','p-dob','p-address','p-emergency'].forEach(id=>document.getElementById(id).value='');
+    closeModal('patientModal');
+  }
+
+  // ================= DOCTORS =================
+  function renderDoctors(){
+    if(doctors.length===0){
+      document.getElementById('doctorsGrid').innerHTML = '<div class="muted" style="grid-column:1/-1;padding:20px 0;text-align:center;">No doctors added yet. Click "+ Add Doctor" to add your first one.</div>';
+      return;
+    }
+    document.getElementById('doctorsGrid').innerHTML = doctors.map(d=>`
+      <div class="card">
+        <div style="display:flex;gap:12px;align-items:center;margin-bottom:10px;">
+          <div class="doc-avatar">${d.name.split(' ').slice(-1)[0][0]}</div>
+          <div><div style="font-weight:700;">${d.name}</div><div class="muted" style="font-size:12.5px;">${d.spec}</div></div>
+        </div>
+        <div style="font-size:12.5px;line-height:1.9;">
+          <div>Experience: <b>${d.exp} yrs</b></div>
+          <div>Fee: <b>₹${d.fee}</b></div>
+          <div>Available: <b>${d.days}</b>, ${d.time}</div>
+        </div>
+        <span class="badge ${d.status==='Available'?'available':'pending'}" style="margin-top:10px;">${d.status}</span>
+      </div>`).join('');
+  }
+  function saveDoctor(){
+    const name = document.getElementById('d-name').value.trim();
+    if(!name){ alert('Please enter doctor name.'); return; }
+    doctorSeq++;
+    doctors.unshift({
+      id:doctorSeq, name, spec:document.getElementById('d-spec').value.trim()||'General',
+      exp:Number(document.getElementById('d-exp').value)||0,
+      fee:Number(document.getElementById('d-fee').value)||500,
+      days:document.getElementById('d-days').value.trim()||'Mon–Sat',
+      time:document.getElementById('d-time').value.trim()||'10:00 AM – 5:00 PM',
+      status:'Available',
+    });
+    renderDoctors();
+    renderDutyAvatars();
+    saveData(); updateDashboardStats();
+    ['d-name','d-spec','d-exp','d-fee','d-days','d-time'].forEach(id=>document.getElementById(id).value='');
+    closeModal('doctorModal');
+  }
+
+  // ================= APPOINTMENTS =================
+  function renderAppointments(){
+    const filter = document.getElementById('apptStatusFilter').value;
+    const list = filter ? appointments.filter(a=>a.status===filter) : appointments;
+    document.getElementById('apptsBody').innerHTML = list.map(a=>`
+      <tr>
+        <td>${a.patient}</td><td>${a.doctor}</td><td>${a.date}</td><td>${a.time}</td>
+        <td><span class="badge ${a.status.toLowerCase().replace(' ','')}">${a.status}</span></td>
+        <td>
+          ${a.status==='Confirmed'||a.status==='Scheduled' ? `<button class="btn btn-outline btn-sm" onclick="markCompleted(${a.id})">Mark Completed</button>` : ''}
+        </td>
+      </tr>`).join('');
+    document.getElementById('apptCount').textContent = '('+appointments.length+')';
+    renderRecentAppts();
+  }
+  function markCompleted(id){
+    const a = appointments.find(x=>x.id===id);
+    if(a){ a.status='Completed'; renderAppointments(); saveData(); updateDashboardStats(); }
+  }
+  function renderRecentAppts(){
+    const palette = ['#16A34A','#0B4F3F','#2563EB','#F59E0B','#DC2626'];
+    if(appointments.length===0){
+      document.getElementById('recentApptsBody').innerHTML = '<tr><td colspan="5" class="muted text-center" style="padding:20px 0;">No appointments booked yet. Click "+ New Appointment" to add one.</td></tr>';
+      return;
+    }
+    document.getElementById('recentApptsBody').innerHTML = appointments.slice(0,5).map((a,i)=>`
+      <tr>
+        <td><div class="ph-name"><div class="ph-icon" style="background:${palette[i%palette.length]}">${a.patient.split(' ').map(w=>w[0]).slice(0,2).join('')}</div>${a.patient}</div></td>
+        <td>${a.doctor}</td><td>${a.date}</td><td>${a.time}</td>
+        <td><span class="ph-status"><i class="sdot" style="background:${a.status==='Completed'?'var(--success)':a.status==='Cancelled'?'var(--error)':'var(--warning)'}"></i>${a.status}</span></td>
+      </tr>`).join('');
+  }
+
+  // ---- Booking flow ----
+  let bkSelectedDoctor = null, bkSelectedSlot = null;
+  function openBooking(){
+    fillSelect('bk-patient', patients.map(p=>p.name));
+    document.getElementById('bk-doctors').innerHTML = doctors.filter(d=>d.status==='Available').map(d=>`
+      <div class="doc-card" data-id="${d.id}" onclick="selectDoctor(${d.id})">
+        <div class="doc-avatar">${d.name.split(' ').slice(-1)[0][0]}</div>
+        <div><div style="font-weight:700;font-size:13px;">${d.name}</div><div class="muted" style="font-size:11.5px;">${d.spec} · ₹${d.fee}</div></div>
+      </div>`).join('');
+    bkSelectedDoctor = doctors.find(d=>d.status==='Available');
+    bkSelectedSlot = null;
+    document.getElementById('bk-date').value = new Date().toISOString().slice(0,10);
+    setTimeout(()=>{ // highlight first doctor + render slots after DOM paints
+      document.querySelector('.doc-card')?.classList.add('selected');
+      renderSlots();
+    },0);
+    openModal('bookingModal');
+  }
+  function selectDoctor(id){
+    bkSelectedDoctor = doctors.find(d=>d.id===id);
+    bkSelectedSlot = null;
+    document.querySelectorAll('#bk-doctors .doc-card').forEach(c=>c.classList.toggle('selected', Number(c.dataset.id)===id));
+    renderSlots();
+  }
+  function renderSlots(){
+    const date = document.getElementById('bk-date').value;
+    const bookedTimes = appointments.filter(a=>a.doctor===bkSelectedDoctor.name && a.date===date && a.status!=='Cancelled').map(a=>a.time);
+    document.getElementById('bk-slots').innerHTML = SLOTS.map(t=>{
+      const isBooked = bookedTimes.includes(t);
+      return `<div class="slot ${isBooked?'booked':''} ${bkSelectedSlot===t?'selected':''}" onclick="${isBooked?'':`pickSlot('${t}')`}">${t}${isBooked?' · Booked':''}</div>`;
+    }).join('');
+  }
+  function pickSlot(t){ bkSelectedSlot = t; renderSlots(); }
+  function confirmBooking(){
+    if(!bkSelectedSlot){ alert('Please pick an available time slot.'); return; }
+    const patient = document.getElementById('bk-patient').value;
+    const date = document.getElementById('bk-date').value;
+    // Double-booking guard (mirrors backend uniqueness check on doctor+date+time)
+    const clash = appointments.some(a=>a.doctor===bkSelectedDoctor.name && a.date===date && a.time===bkSelectedSlot && a.status!=='Cancelled');
+    if(clash){ alert('This slot was just booked by someone else. Please pick another.'); renderSlots(); return; }
+    apptSeq++;
+    appointments.unshift({id:apptSeq, patient, doctor:bkSelectedDoctor.name, date, time:bkSelectedSlot, status:'Scheduled'});
+    renderAppointments();
+    renderBarChart(document.querySelector('.toggle-pill button.active')?.textContent==='Month' ? 'month' : 'week');
+    saveData();
+    updateDashboardStats();
+    closeModal('bookingModal');
+  }
+
+  // ================= PRESCRIPTIONS =================
+  function addRxRow(){
+    const row = document.createElement('div'); row.className='rx-row';
+    row.innerHTML = `<input placeholder="Medicine" class="rx-name"/><input placeholder="Dosage" class="rx-dose"/><input placeholder="Frequency" class="rx-freq"/><input placeholder="Duration" class="rx-dur"/><button class="icon-btn" onclick="this.parentElement.remove()">✕</button>`;
+    document.getElementById('rxRows').appendChild(row);
+  }
+  function renderRx(){
+    if(prescriptions.length===0){
+      document.getElementById('rxBody').innerHTML = '<tr><td colspan="5" class="muted text-center" style="padding:20px 0;">No prescriptions yet.</td></tr>';
+      return;
+    }
+    document.getElementById('rxBody').innerHTML = prescriptions.map(r=>`
+      <tr><td>${r.patient}</td><td>${r.doctor}</td><td>${r.date}</td>
+      <td>${r.meds.map(m=>m.name).join(', ')}</td>
+      <td><button class="btn btn-outline btn-sm" onclick='alert(${JSON.stringify(JSON.stringify(r.meds))})'>View</button></td></tr>`).join('');
+  }
+  function saveRx(){
+    const patient = document.getElementById('rx-patient').value;
+    const doctor = document.getElementById('rx-doctor').value;
+    const rows = document.querySelectorAll('#rxRows .rx-row');
+    const meds = Array.from(rows).map(r=>({
+      name:r.querySelector('.rx-name').value, dose:r.querySelector('.rx-dose').value,
+      freq:r.querySelector('.rx-freq').value, dur:r.querySelector('.rx-dur').value,
+    })).filter(m=>m.name);
+    if(meds.length===0){ alert('Add at least one medicine.'); return; }
+    rxSeq++;
+    prescriptions.unshift({id:rxSeq, patient, doctor, date:new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}), meds});
+    medicalHistory.unshift({patient, date:new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}), diagnosis:document.getElementById('rx-diagnosis').value||'Consultation', doctor});
+    renderRx();
+    saveData();
+    document.getElementById('rxRows').innerHTML='';
+    addRxRow();
+    closeModal('rxModal');
+  }
+
+  // ================= MEDICAL HISTORY =================
+  function renderHistory(){
+    document.getElementById('historyList').innerHTML = medicalHistory.map(h=>`
+      <div style="padding:12px 0;border-bottom:1px solid var(--border);">
+        <div style="display:flex;justify-content:space-between;"><b>${h.diagnosis}</b><span class="muted">${h.date}</span></div>
+        <div class="muted" style="font-size:12.5px;">${h.patient} · ${h.doctor}</div>
+      </div>`).join('') || '<div class="muted">No records yet.</div>';
+  }
+
+  // ================= BILLING =================
+  function calcTotal(){
+    const c=Number(document.getElementById('b-consult').value)||0;
+    const m=Number(document.getElementById('b-med').value)||0;
+    const t=Number(document.getElementById('b-test').value)||0;
+    const d=Number(document.getElementById('b-discount').value)||0;
+    document.getElementById('b-total').textContent = '₹'+Math.max(0,c+m+t-d);
+  }
+  function renderBills(){
+    if(bills.length===0){
+      document.getElementById('billsBody').innerHTML = '<tr><td colspan="5" class="muted text-center" style="padding:20px 0;">No invoices yet.</td></tr>';
+      return;
+    }
+    document.getElementById('billsBody').innerHTML = bills.map(b=>`
+      <tr><td>#${b.id}</td><td>${b.patient}</td><td>₹${b.amount}</td>
+      <td><span class="badge ${b.status.toLowerCase()}">${b.status}</span></td><td>${b.date}</td></tr>`).join('');
+  }
+  function renderMyBills(){
+    if(bills.length===0){
+      document.getElementById('myBillsList').innerHTML = '<div class="muted text-center" style="padding:20px 0;">No bills yet.</div>';
+      return;
+    }
+    document.getElementById('myBillsList').innerHTML = bills.map(b=>`
+      <div style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border);">
+        <div>#${b.id} — ${b.patient}</div><div><b>₹${b.amount}</b> <span class="badge ${b.status.toLowerCase()}">${b.status}</span></div>
+      </div>`).join('');
+  }
+  function saveBill(){
+    billSeq++;
+    const total = Number(document.getElementById('b-total').textContent.replace('₹',''));
+    bills.unshift({id:billSeq, patient:document.getElementById('b-patient').value, amount:total, status:document.getElementById('b-status').value, date:new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})});
+    renderBills();
+    saveData(); updateDashboardStats();
+    closeModal('billModal');
+  }
+
+  // ================= REPORTS (computed from real data, not fake numbers) =================
+  function computeReportStats(range){
+    const days = range==='today' ? 1 : range==='7d' ? 7 : 30;
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - days);
+
+    const inRange = appointments.filter(a=>{
+      const d = new Date(a.date+'T00:00:00');
+      return !isNaN(d) && d >= cutoff;
+    });
+    const completed = inRange.filter(a=>a.status==='Completed').length;
+    const revenue = bills
+      .filter(b=>b.status==='Paid')
+      .reduce((sum,b)=>sum+Number(b.amount||0), 0);
+
+    return {
+      patients: patients.length,
+      appts: inRange.length,
+      completed,
+      revenue,
+    };
+  }
+
+  function renderReports(range){
+    const r = computeReportStats(range);
+    document.getElementById('reportCards').innerHTML = `
+      <div class="card"><div class="stat-icon blue">🧑‍🤝‍🧑</div><div class="stat-label">Total Patients</div><div class="stat-value">${r.patients.toLocaleString()}</div></div>
+      <div class="card"><div class="stat-icon teal">📅</div><div class="stat-label">Appointments</div><div class="stat-value">${r.appts}</div></div>
+      <div class="card"><div class="stat-icon green">✅</div><div class="stat-label">Completed</div><div class="stat-value">${r.completed}</div></div>
+      <div class="card"><div class="stat-icon amber">₹</div><div class="stat-label">Revenue</div><div class="stat-value">₹${r.revenue.toLocaleString()}</div></div>`;
+    renderDoctorPerformance();
+  }
+
+  function renderDoctorPerformance(){
+    const tbody = document.getElementById('doctorPerfBody');
+    if(!tbody) return;
+    if(doctors.length===0){
+      tbody.innerHTML = '<tr><td colspan="4" class="muted text-center" style="padding:16px 0;">No doctors added yet.</td></tr>';
+      return;
+    }
+    const rows = doctors.map(d=>{
+      const docAppts = appointments.filter(a=>a.doctor===d.name);
+      const docCompleted = docAppts.filter(a=>a.status==='Completed');
+      const docRevenue = docCompleted.length * Number(d.fee||0);
+      return { name:d.name, total:docAppts.length, completed:docCompleted.length, revenue:docRevenue };
+    });
+    tbody.innerHTML = rows.map(r=>`
+      <tr><td>${r.name}</td><td>${r.total}</td><td>${r.completed}</td><td>₹${r.revenue.toLocaleString()}</td></tr>`).join('');
+  }
+
+  document.querySelectorAll('#reportFilters button').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      document.querySelectorAll('#reportFilters button').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active');
+      renderReports(b.dataset.range);
+    });
+  });
+
+  // ================= MODAL HELPERS =================
+  function openModal(id){
+    if(id==='patientModal'){}
+    if(id==='doctorModal'){}
+    if(id==='rxModal'){ fillSelect('rx-patient', patients.map(p=>p.name)); fillSelect('rx-doctor', doctors.map(d=>d.name)); document.getElementById('rxRows').innerHTML=''; addRxRow(); }
+    if(id==='billModal'){ fillSelect('b-patient', patients.map(p=>p.name)); calcTotal(); }
+    document.getElementById(id).classList.add('show');
+  }
+  function closeModal(id){ document.getElementById(id).classList.remove('show'); }
+
+  // ================= INIT =================
+  renderPatients();
+  renderDoctors();
+  renderDutyAvatars();
+  renderAppointments();
+  renderRx();
+  renderBills();
+  renderReports('today');
+  renderBarChart('week');
+  updateDashboardStats();
+</script>
+</body>
+</html>

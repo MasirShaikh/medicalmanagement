@@ -1,0 +1,340 @@
+<!-- doctor-list.component.html ke sabse upar wala <style> block isse replace karo -->
+<style>
+:host{--green:#16A34A;--green-d:#0F9D6B;--ink:#0F1B4C;--text:#26335A;--muted:#6B7A99;--card:#FFFFFF;--card-2:#F1FAF5;--line:#E3EEE8;--field:#F2F5FF;--field-line:#D5DDF3;display:block;color:var(--text);font-family:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif}
+
+/* ================= HEADER ================= */
+.doctor-page-header{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:20px}
+.doctor-title{margin:0;font-family:'Plus Jakarta Sans','Inter',sans-serif;font-size:28px;font-weight:800;letter-spacing:-.8px;color:var(--ink)}
+.doctor-count{margin-left:4px;color:var(--muted);font-weight:600}
+.add-doctor-btn{border:0;height:44px;padding:0 20px;border-radius:11px;font:inherit;font-size:14px;font-weight:600;color:#fff;cursor:pointer;background:linear-gradient(135deg,#10A56F,#0B8F5F);box-shadow:0 6px 16px rgba(15,157,107,.28);transition:transform .2s,box-shadow .2s}
+.add-doctor-btn:hover{transform:translateY(-1px);box-shadow:0 10px 22px rgba(15,157,107,.36)}
+.add-doctor-btn:focus-visible,.doctor-save-btn:focus-visible,.doctor-cancel-btn:focus-visible,.edit-doctor-btn:focus-visible{outline:3px solid rgba(15,157,107,.35);outline-offset:2px}
+
+/* ================= TABLE CARD ================= */
+.doctor-card.app-card,.doctor-card{background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden;box-shadow:0 8px 26px -18px rgba(15,157,107,.35);padding:6px 12px 10px}
+.doctor-table{width:100%;margin:0;border-collapse:collapse;--bs-table-bg:transparent;--bs-table-color:var(--text);--bs-table-border-color:var(--line);--bs-table-hover-bg:transparent;background:transparent;color:var(--text)}
+.doctor-table > :not(caption) > * > *{background:transparent;color:var(--text);box-shadow:none;border-color:var(--line)}
+.doctor-table thead th{padding:16px 14px 12px;text-align:left;font-size:12px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line)}
+.doctor-table tbody td{padding:16px 14px;font-size:14px;color:var(--text);border-bottom:1px solid var(--line);vertical-align:middle}
+.doctor-table tbody tr:last-child td{border-bottom:0}
+.doctor-table tbody tr{transition:background .2s}
+.doctor-table tbody tr:hover > td{background:var(--card-2)}
+.doctor-table tbody tr:hover > td:first-child{border-radius:12px 0 0 12px}
+.doctor-table tbody tr:hover > td:last-child{border-radius:0 12px 12px 0}
+.doctor-name{font-weight:700;color:var(--ink)!important}
+.doctor-table tbody td:nth-child(4){font-weight:700;color:var(--green-d)}
+.doctor-table tbody td:nth-child(3),.doctor-table tbody td:nth-child(6){color:var(--muted)}
+.doctor-table .text-muted{color:var(--muted)!important}
+
+/* ================= EDIT BUTTON ================= */
+.actions-col{width:110px;text-align:right!important}
+.doctor-table tbody td.actions-cell{text-align:right}
+.edit-doctor-btn{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 14px;border-radius:9px;border:1.5px solid var(--line);background:#fff;color:var(--ink);font:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:background .2s,border-color .2s,color .2s}
+.edit-doctor-btn:hover{background:#E6F6EE;border-color:var(--green-d);color:var(--green-d)}
+
+/* ================= STATUS BADGES ================= */
+.status-badge{display:inline-flex;align-items:center;gap:7px;padding:5px 12px;border-radius:999px;font-size:12px;font-weight:700}
+.status-badge::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.status-available{background:#DDF5E8;color:#15803D}
+.status-leave{background:#FEF3C7;color:#B45309}
+
+/* ================= MODAL ================= */
+.doctor-modal-backdrop{position:fixed;inset:0;z-index:9999;display:flex;justify-content:center;align-items:center;padding:20px;background:rgba(15,27,76,.38);backdrop-filter:blur(4px)}
+.doctor-modal{width:100%;max-width:760px;max-height:90vh;overflow-y:auto;padding:26px;color:var(--text);background:#fff;border:1px solid var(--line);border-radius:20px;box-shadow:0 30px 80px rgba(15,27,76,.25)}
+.doctor-modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}
+.doctor-modal-header h4{margin:0;font-family:'Plus Jakarta Sans','Inter',sans-serif;font-size:22px;font-weight:800;letter-spacing:-.4px;color:var(--ink)}
+.doctor-close-btn{width:36px;height:36px;display:grid;place-items:center;border:1px solid var(--line);border-radius:10px;background:#fff;font-size:22px;line-height:1;color:var(--muted);cursor:pointer;transition:background .2s,color .2s}
+.doctor-close-btn:hover{background:var(--card-2);color:var(--ink)}
+
+/* ================= FORM ================= */
+.doctor-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.doctor-form-group{display:flex;flex-direction:column}
+.doctor-form-group label{margin-bottom:7px;font-size:13px;font-weight:600;color:var(--ink)}
+.doctor-form-group input,.doctor-form-group select{width:100%;height:46px;padding:9px 14px;border:1.5px solid var(--field-line);border-radius:12px;outline:none;font:inherit;font-size:14px;color:var(--ink);background:var(--field);box-sizing:border-box;transition:border-color .2s,box-shadow .2s,background .2s}
+.doctor-form-group input::placeholder{color:#8591AE}
+.doctor-form-group select option{background:#fff;color:var(--ink)}
+.doctor-form-group input:focus,.doctor-form-group select:focus{border-color:var(--green-d);background:#fff;box-shadow:0 0 0 4px rgba(15,157,107,.13)}
+
+/* ================= BUTTONS ================= */
+.doctor-form-footer{display:flex;justify-content:flex-end;gap:10px;margin-top:28px;padding-top:20px;border-top:1px solid var(--line)}
+.doctor-cancel-btn,.doctor-save-btn{min-width:120px;height:44px;border-radius:11px;font:inherit;font-size:14px;font-weight:600;cursor:pointer;transition:transform .2s,background .2s,border-color .2s}
+.doctor-cancel-btn{color:var(--ink);background:#fff;border:1.5px solid var(--line)}
+.doctor-cancel-btn:hover{background:var(--card-2)}
+.doctor-save-btn{color:#fff;border:0;background:linear-gradient(135deg,#10A56F,#0B8F5F);box-shadow:0 6px 16px rgba(15,157,107,.28)}
+.doctor-save-btn:hover{transform:translateY(-1px)}
+.doctor-save-btn:disabled,.doctor-cancel-btn:disabled{opacity:.6;cursor:not-allowed;transform:none}
+
+/* ================= RESPONSIVE ================= */
+@media (max-width:900px){.doctor-card{overflow-x:auto}.doctor-table{min-width:800px}}
+@media (max-width:700px){.doctor-form-grid{grid-template-columns:1fr}.doctor-modal{padding:20px}.doctor-title{font-size:22px}}
+</style>
+
+<!-- ========================= HEADER ========================= -->
+
+<div class="doctor-page-header">
+
+  <h5 class="doctor-title">
+    Doctors
+    <span class="doctor-count">({{ doctors.length }})</span>
+  </h5>
+
+  <button
+    type="button"
+    class="add-doctor-btn"
+    (click)="openDoctorForm()"
+  >
+    + Add Doctor
+  </button>
+
+</div>
+
+
+<!-- ========================= LOADING ========================= -->
+
+<div *ngIf="loading" class="text-muted">
+  Loading doctors...
+</div>
+
+
+<!-- ========================= DOCTOR TABLE ========================= -->
+
+<div *ngIf="!loading" class="app-card doctor-card">
+
+  <table class="table table-clean mb-0 doctor-table">
+
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Specialization</th>
+        <th>Qualification</th>
+        <th>Fee</th>
+        <th>Status</th>
+        <th>Phone</th>
+        <th class="actions-col">Action</th>
+      </tr>
+    </thead>
+
+    <tbody>
+
+      <tr *ngFor="let d of doctors">
+
+        <td class="doctor-name">{{ d.name }}</td>
+
+        <td>{{ d.specialization }}</td>
+
+        <td>{{ d.qualification || '—' }}</td>
+
+        <td>₹{{ d.consultation_fee }}</td>
+
+        <td>
+          <span
+            *ngIf="d.status === 'available'"
+            class="status-badge status-available"
+          >
+            Available
+          </span>
+
+          <span
+            *ngIf="d.status === 'on_leave'"
+            class="status-badge status-leave"
+          >
+            On Leave
+          </span>
+        </td>
+
+        <td>{{ d.phone }}</td>
+
+        <td class="actions-cell">
+          <button
+            type="button"
+            class="edit-doctor-btn"
+            (click)="openEditForm(d)"
+          >
+            ✎ Edit
+          </button>
+        </td>
+
+      </tr>
+
+      <tr *ngIf="doctors.length === 0">
+        <td colspan="7" class="text-center text-muted py-5">
+          No doctors found.
+        </td>
+      </tr>
+
+    </tbody>
+
+  </table>
+
+</div>
+
+
+<!-- ========================= ADD / EDIT DOCTOR POPUP ========================= -->
+
+<div
+  *ngIf="showDoctorForm"
+  class="doctor-modal-backdrop"
+  (click)="closeDoctorForm()"
+>
+
+  <div class="doctor-modal" (click)="$event.stopPropagation()">
+
+    <!-- HEADER -->
+
+    <div class="doctor-modal-header">
+
+      <h4>{{ editingId !== null ? 'Edit Doctor' : 'Add Doctor' }}</h4>
+
+      <button
+        type="button"
+        class="doctor-close-btn"
+        (click)="closeDoctorForm()"
+        [disabled]="saving"
+      >
+        ×
+      </button>
+
+    </div>
+
+    <!-- FORM -->
+
+    <form (ngSubmit)="saveDoctor()">
+
+      <div class="doctor-form-grid">
+
+        <div class="doctor-form-group">
+          <label>Doctor Name</label>
+          <input
+            type="text"
+            name="name"
+            [(ngModel)]="doctor.name"
+            placeholder="Enter doctor name"
+            required
+          >
+        </div>
+
+        <div class="doctor-form-group">
+          <label>Specialization</label>
+          <input
+            type="text"
+            name="specialization"
+            [(ngModel)]="doctor.specialization"
+            placeholder="e.g. Cardiologist"
+            required
+          >
+        </div>
+
+        <div class="doctor-form-group">
+          <label>Qualification</label>
+          <input
+            type="text"
+            name="qualification"
+            [(ngModel)]="doctor.qualification"
+            placeholder="e.g. MBBS, MD"
+          >
+        </div>
+
+        <div class="doctor-form-group">
+          <label>Email</label>
+          <input
+            type="email"
+            name="email"
+            [(ngModel)]="doctor.email"
+            placeholder="doctor@example.com"
+          >
+        </div>
+
+        <div class="doctor-form-group">
+          <label>Phone</label>
+          <input
+            type="text"
+            name="phone"
+            [(ngModel)]="doctor.phone"
+            placeholder="Enter phone number"
+            required
+          >
+        </div>
+
+        <div class="doctor-form-group">
+          <label>Experience</label>
+          <input
+            type="number"
+            name="experience_years"
+            [(ngModel)]="doctor.experience_years"
+            placeholder="Years"
+            min="0"
+          >
+        </div>
+
+        <div class="doctor-form-group">
+          <label>Consultation Fee</label>
+          <input
+            type="number"
+            name="consultation_fee"
+            [(ngModel)]="doctor.consultation_fee"
+            placeholder="e.g. 500"
+            min="0"
+          >
+        </div>
+
+        <div class="doctor-form-group">
+          <label>Available Days</label>
+          <input
+            type="text"
+            name="available_days"
+            [(ngModel)]="doctor.available_days"
+            placeholder="Mon, Tue, Wed"
+          >
+        </div>
+
+        <div class="doctor-form-group">
+          <label>Available Time</label>
+          <input
+            type="text"
+            name="available_time"
+            [(ngModel)]="doctor.available_time"
+            placeholder="10 AM - 5 PM"
+          >
+        </div>
+
+        <div class="doctor-form-group">
+          <label>Status</label>
+          <select name="status" [(ngModel)]="doctor.status">
+            <option value="available">Available</option>
+            <option value="on_leave">On Leave</option>
+          </select>
+        </div>
+
+      </div>
+
+      <!-- FOOTER -->
+
+      <div class="doctor-form-footer">
+
+        <button
+          type="button"
+          class="doctor-cancel-btn"
+          (click)="closeDoctorForm()"
+          [disabled]="saving"
+        >
+          Cancel
+        </button>
+
+        <button
+          type="submit"
+          class="doctor-save-btn"
+          [disabled]="saving"
+        >
+          {{ saving
+              ? 'Saving...'
+              : (editingId !== null ? 'Update Doctor' : 'Save Doctor') }}
+        </button>
+
+      </div>
+
+    </form>
+
+  </div>
+
+</div>
+

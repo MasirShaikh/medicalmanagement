@@ -1,0 +1,97 @@
+<!-- Patients list: template ke sabse upar -->
+<!-- patient-list.component.html AUR patient-form.component.html dono ke <style> block isse replace karo -->
+<style>
+:host{--green:#16A34A;--green-d:#0F9D6B;--mint:#34C58F;--ink:#0F1B4C;--text:#26335A;--muted:#6B7A99;--card:#FFFFFF;--card-2:#F1FAF5;--line:#E3EEE8;--field:#F2F5FF;--field-line:#D5DDF3;--danger:#DC2626;display:block;color:var(--text);font-family:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif}
+
+/* ===== titles ===== */
+h5{margin:0;font-family:'Plus Jakarta Sans','Inter',sans-serif;font-size:28px;font-weight:800;letter-spacing:-.8px;color:var(--ink)}
+h6{margin:0 0 14px;font-family:'Plus Jakarta Sans','Inter',sans-serif;font-size:17px;font-weight:800;color:var(--ink)}
+.text-muted{color:var(--muted)!important}
+h5 .text-muted{font-weight:600}
+.fw-medium{font-weight:700;color:var(--ink)}
+
+/* ===== cards ===== */
+.app-card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:0 8px 26px -18px rgba(15,157,107,.35);color:var(--text)}
+.app-card:has(> .table){padding:6px 12px 10px;overflow-x:auto}
+
+/* ===== table ===== */
+.table{width:100%;margin:0;border-collapse:collapse;--bs-table-bg:transparent;--bs-table-color:var(--text);--bs-table-border-color:var(--line);--bs-table-hover-bg:transparent;background:transparent;color:var(--text)}
+.table > :not(caption) > * > *{background:transparent;color:var(--text);box-shadow:none;border-color:var(--line)}
+.table thead th{padding:16px 14px 12px;text-align:left;font-size:12px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line)}
+.table tbody td{padding:15px 14px;font-size:14px;border-bottom:1px solid var(--line);vertical-align:middle}
+.table tbody tr:last-child td{border-bottom:0}
+.table tbody tr:hover > td{background:var(--card-2)}
+.table tbody tr:hover > td:first-child{border-radius:12px 0 0 12px}
+.table tbody tr:hover > td:last-child{border-radius:0 12px 12px 0}
+@media (max-width:900px){.table{min-width:680px}}
+
+/* ===== buttons ===== */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:42px;padding:0 16px;border-radius:11px;border:1.5px solid transparent;font:inherit;font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap;transition:transform .2s,background .2s,border-color .2s,box-shadow .2s}
+.btn-sm{height:36px;padding:0 14px;font-size:13px;border-radius:10px}
+.d-flex.mb-3 > .btn{height:42px;padding:0 18px;font-size:14px;border-radius:11px}
+.btn-primary,.btn-success{color:#fff;border:0;background:linear-gradient(135deg,#10A56F,#0B8F5F);box-shadow:0 6px 16px rgba(15,157,107,.28)}
+.btn-primary:hover,.btn-success:hover{transform:translateY(-1px);box-shadow:0 10px 22px rgba(15,157,107,.36)}
+.btn-outline-primary{color:var(--green-d);background:#fff;border-color:rgba(15,157,107,.35)}
+.btn-outline-primary:hover{background:#E6F6EE;border-color:var(--green-d)}
+.btn-outline-danger{color:var(--danger);background:#fff;border-color:rgba(220,38,38,.3)}
+.btn-outline-danger:hover{background:rgba(220,38,38,.07);border-color:var(--danger)}
+.btn-outline-secondary,.btn-outline-light{color:var(--ink);background:#fff;border-color:var(--line)}
+.btn-outline-secondary:hover,.btn-outline-light:hover{background:var(--card-2);border-color:#CFE3D8}
+.btn:disabled{opacity:.55;cursor:not-allowed;transform:none}
+.btn:focus-visible{outline:3px solid rgba(15,157,107,.35);outline-offset:2px}
+
+/* ===== form fields ===== */
+.form-label{display:block;margin-bottom:7px;font-size:13px;font-weight:600;color:var(--ink)}
+.form-control,.form-select{width:100%;height:46px;padding:9px 14px;border:1.5px solid var(--field-line);border-radius:12px;outline:none;font:inherit;font-size:14px;color:var(--ink);background-color:var(--field);box-sizing:border-box;transition:border-color .2s,box-shadow .2s,background-color .2s}
+.form-select{appearance:none;padding-right:36px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%236B7A99' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center}
+.form-control::placeholder{color:#8591AE}
+.form-select option{background:#fff;color:var(--ink)}
+.form-control:focus,.form-select:focus{border-color:var(--green-d);box-shadow:0 0 0 4px rgba(15,157,107,.13);background-color:#fff;color:var(--ink)}
+
+/* ===== popup (appointments / patients modal) ===== */
+.modal-backdrop-custom{position:fixed;inset:0;z-index:1000;background:rgba(15,27,76,.38);backdrop-filter:blur(4px)}
+.modal-panel{position:fixed;inset:0;transform:none;z-index:1001;display:flex;align-items:center;justify-content:center;padding:20px;pointer-events:none}
+.modal-panel > .app-card{pointer-events:auto;max-width:100%;max-height:90vh;overflow-y:auto;padding:26px;border-radius:20px;box-shadow:0 30px 80px rgba(15,27,76,.25)}
+.modal-panel h6{font-size:20px;margin-bottom:18px}
+.alert{padding:10px 14px;border-radius:10px;font-size:13px}
+.alert-danger{color:var(--danger);background:rgba(220,38,38,.07);border:1px solid rgba(220,38,38,.25)}
+.small{font-size:13px}
+.me-1{margin-right:6px}
+.text-end{text-align:right}
+
+/* search bar card */
+.app-card.mb-3{padding:14px}
+.app-card.mb-3 .form-control{height:48px;padding-left:16px}
+</style>
+<div class="modal-backdrop-custom" (click)="cancel()"></div>
+<div class="modal-panel">
+  <div class="app-card" style="width: 480px;">
+    <h6 class="mb-3">{{ isEdit ? 'Edit Patient' : 'Add Patient' }}</h6>
+
+    <div class="mb-2"><label class="form-label">Full Name</label><input class="form-control" [(ngModel)]="model.full_name" name="full_name" /></div>
+    <div class="row g-2 mb-2">
+      <div class="col-6"><label class="form-label">Email</label><input class="form-control" [(ngModel)]="model.email" name="email" type="email" /></div>
+      <div class="col-6"><label class="form-label">Phone</label><input class="form-control" [(ngModel)]="model.phone" name="phone" /></div>
+    </div>
+    <div class="row g-2 mb-2">
+      <div class="col-6"><label class="form-label">Date of Birth</label><input class="form-control" [(ngModel)]="model.date_of_birth" name="dob" type="date" /></div>
+      <div class="col-6"><label class="form-label">Gender</label>
+        <select class="form-select" [(ngModel)]="model.gender" name="gender">
+          <option value="male">Male</option><option value="female">Female</option><option value="other">Other</option>
+        </select>
+      </div>
+    </div>
+    <div class="row g-2 mb-2">
+      <div class="col-6"><label class="form-label">Blood Group</label><input class="form-control" [(ngModel)]="model.blood_group" name="blood_group" placeholder="O+" /></div>
+      <div class="col-6"><label class="form-label">Emergency Contact</label><input class="form-control" [(ngModel)]="model.emergency_contact" name="emergency" /></div>
+    </div>
+    <div class="mb-3"><label class="form-label">Address</label><input class="form-control" [(ngModel)]="model.address" name="address" /></div>
+
+    <div class="alert alert-danger py-2" *ngIf="error">{{ error }}</div>
+
+    <div class="d-flex justify-content-end gap-2">
+      <button class="btn btn-outline-secondary btn-sm" (click)="cancel()">Cancel</button>
+      <button class="btn btn-primary btn-sm" (click)="save()" [disabled]="saving">{{ saving ? 'Saving...' : 'Save' }}</button>
+    </div>
+  </div>
+</div>
